@@ -42,17 +42,16 @@ public class JWTUtils {
 
     /**
      * 默认方式创建token字符串
+     * 根据传入的含@Token注解字段的对象自动识别目标字段
+     * 并读取配置文件中的签名和过期时间生成token
      *
      * @param t   载荷字段所属对象
      * @param <T> 泛型
      * @return 已创建的token字符串
      */
     public <T> String createToken(T t) {
-        //jackson的序列化工具
         ObjectMapper objectMapper = new ObjectMapper();
-        //auth0的token生成工具
         JWTCreator.Builder builder = JWT.create();
-        //获取class对象的属性
         Field[] declaredFields = t.getClass().getDeclaredFields();
         for (Field field : declaredFields) {
             if (field.isAnnotationPresent(Token.class)) {
@@ -87,7 +86,7 @@ public class JWTUtils {
     public <T> T parseToken(String token, Class<T> tClass) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token).getClaims();
-        T t = null;
+        T t;
         try {
             t = tClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
