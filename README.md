@@ -8,11 +8,11 @@
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>1.0</version> 
+    <version>1.1</version> 
 </dependency>
 ```
 
-通过以下方式配置签名和过期时间（单位：秒）：
+通过以下方式配置签名和过期时间（单位：秒）(修复中，不可用）：
 ```yml
 token：
     sign：wbrprivate
@@ -56,3 +56,4 @@ LoginParam param = jwtUtils.parseToken(token, LoginParam.class);
 log.info("username: " + param.getUsername());
 log.info("password: " + param.getPassword());
 ```
+该工具持续优化中，请保持关注！
