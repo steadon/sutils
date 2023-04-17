@@ -8,7 +8,7 @@
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>1.1</version> 
+    <version>1.2</version> 
 </dependency>
 ```
 
@@ -32,13 +32,15 @@ public class LoginParam {
     private String password;
 }
 ```
-基本方法如下所示：
+初始化方式如下所示：
 ```java
-//创建JWTUtils对象
-JWTUtils jwtUtils = new JWTUtils();
-jwtUtils.setSign("wbr");
-jwtUtils.setTime(10);
+//注入JWTUtils对象
+@Autowired
+JWTUtils jwtUtils;
+```
 
+相关方法如下所示：
+```java
 //创建LoginParam模拟登录传参
 LoginParam loginParam = new LoginParam();
 loginParam.setUsername("steadon");
