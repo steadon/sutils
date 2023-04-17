@@ -1,5 +1,5 @@
 # JWTUtils
-一个快速生成、验证、解析JWT的轻量工具
+一个快速生成、验证、解析JWT的轻量工具。
 
 ### 使用
 您可以通过maven导入一下依赖进而使用该工具：
@@ -12,7 +12,7 @@
 </dependency>
 ```
 
-通过以下方式配置签名和过期时间（单位：秒）(修复中，不可用）：
+通过以下方式配置签名和过期时间（单位：秒）：
 ```yml
 token：
     sign：wbrprivate
@@ -32,6 +32,7 @@ public class LoginParam {
     private String password;
 }
 ```
+
 初始化方式如下所示：
 ```java
 //注入JWTUtils对象
