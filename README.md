@@ -37,7 +37,7 @@ public class LoginParam {
 ```java
 //注入JWTUtils对象
 @Autowired
-JWTUtils jwtUtils;
+private JWTUtils jwtUtils;
 ```
 
 相关方法如下所示：
