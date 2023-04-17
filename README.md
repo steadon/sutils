@@ -2,13 +2,13 @@
 一个快速生成、验证、解析JWT的轻量工具。
 
 ### 使用
-您可以通过maven导入一下依赖进而使用该工具：
+你可以通过maven导入以下依赖进而使用该工具：
 
 ```xml
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>1.2</version> 
+    <version>1.2.0</version> 
 </dependency>
 ```
 
@@ -16,15 +16,11 @@
 ```yml
 token：
     sign：wbrprivate
-    _time：60
+    time：3600
 ```
 
-通过`@Token`注解标记需要放入载荷中的字段：
+使用 `@Token` 注解标记需要放入载荷中的字段：
 ```java
-import com.steadon.Token;
-import lombok.Data;
-
-@Data
 public class LoginParam {
     @Token
     private String username;
@@ -33,9 +29,8 @@ public class LoginParam {
 }
 ```
 
-初始化方式如下所示：
+初始化方式如下所示（支持自动注入）：
 ```java
-//注入JWTUtils对象
 @Autowired
 private JWTUtils jwtUtils;
 ```
@@ -59,4 +54,4 @@ LoginParam param = jwtUtils.parseToken(token, LoginParam.class);
 log.info("username: " + param.getUsername());
 log.info("password: " + param.getPassword());
 ```
-该工具持续优化中，请保持关注！
+该工具持续优化中，请保持关注！你的star就是我的动力！
