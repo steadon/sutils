@@ -10,14 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 import java.util.Map;
 
 @Component
 @ConfigurationProperties(prefix = "token")
 public class JWTUtils {
-
     private String sign;
 
     private int time;
@@ -48,10 +46,8 @@ public class JWTUtils {
      * @param t   载荷字段所属对象
      * @param <T> 泛型
      * @return 已创建的token字符串
-     * @throws IllegalAccessException  异常1
-     * @throws JsonProcessingException 异常2
      */
-    public <T> String createToken(T t) throws IllegalAccessException, JsonProcessingException {
+    public <T> String createToken(T t) {
         //jackson的序列化工具
         ObjectMapper objectMapper = new ObjectMapper();
         //auth0的token生成工具
@@ -61,8 +57,17 @@ public class JWTUtils {
         for (Field field : declaredFields) {
             if (field.isAnnotationPresent(Token.class)) {
                 field.setAccessible(true);
-                Object o = field.get(t);
-                builder.withClaim(field.getName(), objectMapper.writeValueAsString(o));
+                Object o;
+                try {
+                    o = field.get(t);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    builder.withClaim(field.getName(), objectMapper.writeValueAsString(o));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         Calendar instance = Calendar.getInstance();
@@ -78,22 +83,26 @@ public class JWTUtils {
      * @param tClass 映射类型
      * @param <T>    泛型
      * @return 映射对象
-     * @throws NoSuchMethodException     异常1
-     * @throws InvocationTargetException 异常2
-     * @throws InstantiationException    异常3
-     * @throws IllegalAccessException    异常4
-     * @throws JsonProcessingException   异常5
      */
-    public <T> T parseToken(String token, Class<T> tClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, JsonProcessingException {
+    public <T> T parseToken(String token, Class<T> tClass) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token).getClaims();
-        T t = tClass.getDeclaredConstructor().newInstance();
+        T t = null;
+        try {
+            t = tClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         Field[] declaredFields = tClass.getDeclaredFields();
         for (Field field : declaredFields) {
             if (field.isAnnotationPresent(Token.class)) {
                 field.setAccessible(true);
                 if (claims.containsKey(field.getName())) {
-                    field.set(t, objectMapper.readValue(claims.get(field.getName()).asString(), field.getType()));
+                    try {
+                        field.set(t, objectMapper.readValue(claims.get(field.getName()).asString(), field.getType()));
+                    } catch (IllegalAccessException | JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

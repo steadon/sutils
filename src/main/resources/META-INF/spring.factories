@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.steadon.utils.JWTUtils
+com.steadon.JWTUtils
