@@ -16,7 +16,7 @@
 ```yml
 token：
     sign：wbrprivate
-    time：60
+    _time：60
 ```
 
 通过`@Token`注解标记需要放入载荷中的字段：

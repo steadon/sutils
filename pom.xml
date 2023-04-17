@@ -13,7 +13,7 @@
 
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>1.2</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <name>JWTUtils</name>
@@ -104,12 +104,6 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                        <!-- JDK8必须使用下面的配置 -->
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                            <charset>UTF-8</charset>
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

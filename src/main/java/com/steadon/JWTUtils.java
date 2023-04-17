@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -13,12 +12,23 @@ import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Map;
 
+/**
+ * A lightweight tool for generating tokens quickly
+ *
+ * @author Steadon
+ * @version 1.2.1
+ */
 @Component
 @ConfigurationProperties(prefix = "token")
 public class JWTUtils {
     private String sign;
 
-    private int time;
+    private String time;
+
+    private int _time;
+
+    public JWTUtils() {
+    }
 
     public String getSign() {
         return sign;
@@ -28,26 +38,23 @@ public class JWTUtils {
         this.sign = sign;
     }
 
-    public int getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(String time) {
         this.time = time;
-    }
-
-    public JWTUtils() {
-
+        this._time = Integer.parseInt(time);
     }
 
     /**
-     * 默认方式创建token字符串
-     * 根据传入的含@Token注解字段的对象自动识别目标字段
-     * 并读取配置文件中的签名和过期时间生成token
+     * The default way is to create a token string
+     * The target field is automatically identified based on the incoming object with @Token annotation field
+     * And read the signature and expiration _time in the configuration file to generate a token
      *
-     * @param t   载荷字段所属对象
-     * @param <T> 泛型
-     * @return 已创建的token字符串
+     * @param t   The object to which the payload field belongs
+     * @param <T> Any type
+     * @return The token string that is created
      */
     public <T> String createToken(T t) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -56,37 +63,32 @@ public class JWTUtils {
         for (Field field : declaredFields) {
             if (field.isAnnotationPresent(Token.class)) {
                 field.setAccessible(true);
-                Object o;
+                Object o = null;
                 try {
                     o = field.get(t);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
                     builder.withClaim(field.getName(), objectMapper.writeValueAsString(o));
-                } catch (JsonProcessingException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
         }
         Calendar instance = Calendar.getInstance();
-        //添加过期时间并使用签名生成token
-        instance.add(Calendar.SECOND, this.time);
+        instance.add(Calendar.SECOND, this._time);
         return builder.withExpiresAt(instance.getTime()).sign(Algorithm.HMAC256(this.sign));
     }
 
     /**
-     * 从token中获取对象
+     * Parses from the incoming token and maps to an object of the specified type
      *
-     * @param token  待解析的token
-     * @param tClass 映射类型
-     * @param <T>    泛型
-     * @return 映射对象
+     * @param token  The token to be parsed
+     * @param tClass Mapping type
+     * @param <T>    Any type
+     * @return Map object with payload information
      */
     public <T> T parseToken(String token, Class<T> tClass) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token).getClaims();
-        T t;
+        T t = null;
         try {
             t = tClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -99,7 +101,7 @@ public class JWTUtils {
                 if (claims.containsKey(field.getName())) {
                     try {
                         field.set(t, objectMapper.readValue(claims.get(field.getName()).asString(), field.getType()));
-                    } catch (IllegalAccessException | JsonProcessingException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -109,16 +111,15 @@ public class JWTUtils {
     }
 
     /**
-     * 验证token
+     * Verify that the token is signed and has not expired
      *
-     * @param token 要验证的token
-     * @return 验证结果
+     * @param token A token that needs to be verified
+     * @return The result of the verification (true or false)
      */
     public boolean checkToken(String token) {
         try {
             JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token);
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
         return true;
