@@ -8,15 +8,15 @@
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>1.2.0</version> 
+    <version>1.3.0</version> 
 </dependency>
 ```
 
-通过以下方式配置签名和过期时间（单位：秒）：
+通过以下方式配置签名和过期时间（单位：秒），其中time字段支持二元表达式（暂不支持括号运算符）：
 ```yml
 token：
     sign：wbrprivate
-    time：3600
+    time：15 * 24 * 60 * 60
 ```
 
 使用 `@Token` 注解标记需要放入载荷中的字段：
