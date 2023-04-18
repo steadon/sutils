@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * A lightweight tool for generating tokens quickly
@@ -44,7 +45,7 @@ public class JWTUtils {
 
     public void setTime(String time) {
         this.time = time;
-        this._time = Integer.parseInt(time);
+        this._time = calculate(this.time);
     }
 
     /**
@@ -123,5 +124,41 @@ public class JWTUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Binary operation on time expressions in configuration files
+     * bracket operators are not supported
+     *
+     * @param time Token expressions
+     * @return Total seconds
+     */
+    public int calculate(String time) {
+        Stack<Integer> nums = new Stack<>();
+
+        int num = 0;
+        char prevOp = '+';
+
+        for (int i = 0; i < time.length(); i++) {
+            char c = time.charAt(i);
+            if (Character.isDigit(c)) {
+                num = num * 10 + c - '0';
+            }
+            if (!Character.isDigit(c) && c != ' ' || i == time.length() - 1) {
+                switch (prevOp) {
+                    case '+' -> nums.push(num);
+                    case '-' -> nums.push(-num);
+                    case '*' -> nums.push(nums.pop() * num);
+                    case '/' -> nums.push(nums.pop() / num);
+                }
+                prevOp = c;
+                num = 0;
+            }
+        }
+        //此处复用num节约内存
+        while (!nums.isEmpty()) {
+            num += nums.pop();
+        }
+        return num;
     }
 }
