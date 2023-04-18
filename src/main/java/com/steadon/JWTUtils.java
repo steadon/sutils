@@ -17,7 +17,7 @@ import java.util.Stack;
  * A lightweight tool for generating tokens quickly
  *
  * @author Steadon
- * @version 1.2.1
+ * @version 1.3.0
  */
 @Component
 @ConfigurationProperties(prefix = "token")
