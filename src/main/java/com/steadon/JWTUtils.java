@@ -101,7 +101,7 @@ public class JWTUtils {
      * @return Map object with payload information
      */
     public <T> T parseToken(String token, Class<T> tClass) {
-        if (!Objects.equals(keyStr, "")) token = encrypt(token);
+        if (!Objects.equals(keyStr, "")) token = decrypt(token);
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token).getClaims();
         T t = null;
@@ -133,7 +133,7 @@ public class JWTUtils {
      * @return The result of the verification (true or false)
      */
     public boolean checkToken(String token) {
-        if (!Objects.equals(keyStr, "")) token = encrypt(token);
+        if (!Objects.equals(keyStr, "")) token = decrypt(token);
         try {
             JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token);
         } catch (Exception e) {
@@ -183,7 +183,6 @@ public class JWTUtils {
      *
      * @param token JWT before encryption
      * @return Encrypted JWT
-     * @apiNote Use the same function to encrypt or decrypt your JWT
      */
     private String encrypt(String token) {
         String[] parts = token.split("\\.");
@@ -198,5 +197,26 @@ public class JWTUtils {
             throw new RuntimeException(e);
         }
         return String.format("%s.%s.%s", parts[0], encryptedPayload, parts[2]);
+    }
+
+    /**
+     * AES symmetric decryption of the payload portion of the JWT
+     *
+     * @param token JWT before decryption
+     * @return Decrypted JWT
+     */
+    private String decrypt(String token) {
+        String[] parts = token.split("\\.");
+        String decryptedPayload;
+        try {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec);
+            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(parts[1]));
+            decryptedPayload = Base64.getEncoder().encodeToString(decryptedBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return String.format("%s.%s.%s", parts[0], decryptedPayload, parts[2]);
     }
 }
