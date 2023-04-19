@@ -29,7 +29,6 @@ public class JWTUtils {
 
     private int _time = 15 * 24 * 60 * 60;
 
-    //TODO 强加密
     private String keyStr = "";
 
     public JWTUtils() {

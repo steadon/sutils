@@ -11,14 +11,14 @@
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>2.0.3</version>
 </dependency>
 ```
 
 通过以下方式配置签名、有效时间和密钥：
 
-- sign：签发jwt所用的签名，默认值为"root"
-- keyStr：加密载荷所使用的密钥，默认不加密（加密载荷定然会影响性能）
+- sign：签发jwt所用的签名，默认值为root
+- keyStr：加密载荷所使用的密钥（16/24/32位字符），默认不加密
 - time：有效时间（单位：秒），支持除了括号运算符以外的二元表达式，默认15天
 
 ```yml
