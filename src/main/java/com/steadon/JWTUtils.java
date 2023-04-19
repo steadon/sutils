@@ -217,6 +217,6 @@ public class JWTUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return String.format("%s.%s.%s", parts[0], decryptedPayload, parts[2]);
+        return String.format("%s.%s.%s", parts[0], decryptedPayload.substring(0, decryptedPayload.length() - 2), parts[2]);
     }
 }
