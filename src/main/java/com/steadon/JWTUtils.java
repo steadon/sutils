@@ -8,25 +8,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Field;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.Stack;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * A lightweight tool for generating tokens quickly
  *
  * @author Steadon
- * @version 1.3.0
+ * @version 2.0.0
  */
 @Component
 @ConfigurationProperties(prefix = "token")
 public class JWTUtils {
-    private String sign;
+    private String sign = "root";
 
-    private String time;
+    private String time = "15 * 24 * 60 * 60";
 
-    private int _time;
+    private int _time = 15 * 24 * 60 * 60;
+
+    //TODO 强加密
+    private String keyStr = "";
 
     public JWTUtils() {
     }
@@ -37,6 +41,14 @@ public class JWTUtils {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    public String getKeyStr() {
+        return keyStr;
+    }
+
+    public void setKeyStr(String keyStr) {
+        this.keyStr = keyStr;
     }
 
     public String getTime() {
@@ -75,7 +87,9 @@ public class JWTUtils {
         }
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.SECOND, this._time);
-        return builder.withExpiresAt(instance.getTime()).sign(Algorithm.HMAC256(this.sign));
+        String token = builder.withExpiresAt(instance.getTime()).sign(Algorithm.HMAC256(this.sign));
+        if (!Objects.equals(keyStr, "")) return encrypt(token);
+        return token;
     }
 
     /**
@@ -87,6 +101,7 @@ public class JWTUtils {
      * @return Map object with payload information
      */
     public <T> T parseToken(String token, Class<T> tClass) {
+        if (!Objects.equals(keyStr, "")) token = encrypt(token);
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token).getClaims();
         T t = null;
@@ -118,6 +133,7 @@ public class JWTUtils {
      * @return The result of the verification (true or false)
      */
     public boolean checkToken(String token) {
+        if (!Objects.equals(keyStr, "")) token = encrypt(token);
         try {
             JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token);
         } catch (Exception e) {
@@ -133,7 +149,7 @@ public class JWTUtils {
      * @param time Token expressions
      * @return Total seconds
      */
-    public int calculate(String time) {
+    private int calculate(String time) {
         Stack<Integer> nums = new Stack<>();
 
         int num = 0;
@@ -160,5 +176,27 @@ public class JWTUtils {
             num += nums.pop();
         }
         return num;
+    }
+
+    /**
+     * AES symmetric encryption of the payload portion of the JWT
+     *
+     * @param token JWT before encryption
+     * @return Encrypted JWT
+     * @apiNote Use the same function to encrypt or decrypt your JWT
+     */
+    private String encrypt(String token) {
+        String[] parts = token.split("\\.");
+        String encryptedPayload;
+        try {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+            byte[] encryptedBytes = cipher.doFinal(Base64.getDecoder().decode(parts[1]));
+            encryptedPayload = Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return String.format("%s.%s.%s", parts[0], encryptedPayload, parts[2]);
     }
 }
