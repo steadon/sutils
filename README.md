@@ -24,7 +24,7 @@
 ```yml
 token:
   sign: wbrprivate
-  key-str: secretkey
+  key-str: secretkeyofmyaes
   time: 15 * 24 * 60 * 60
 ```
 
