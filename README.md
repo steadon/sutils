@@ -1,5 +1,8 @@
 # JWTUtils
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/your-username/your-repository/blob/master/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.steadon/utils.svg)](https://mvnrepository.com/artifact/io.github.steadon/utils)
+
 一个快速生成、验证、解析JWT的轻量工具。
 
 ### 使用
