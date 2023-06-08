@@ -14,11 +14,13 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static java.lang.Character.isDigit;
+
 /**
  * A lightweight tool for generating tokens quickly
  *
  * @author Steadon
- * @version 2.0.0
+ * @version 2.1.0
  */
 @Component
 @ConfigurationProperties(prefix = "token")
@@ -72,18 +74,15 @@ public class JWTUtils {
         ObjectMapper objectMapper = new ObjectMapper();
         JWTCreator.Builder builder = JWT.create();
         Field[] declaredFields = t.getClass().getDeclaredFields();
-        for (Field field : declaredFields) {
-            if (field.isAnnotationPresent(Token.class)) {
-                field.setAccessible(true);
-                Object o = null;
-                try {
-                    o = field.get(t);
-                    builder.withClaim(field.getName(), objectMapper.writeValueAsString(o));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        Arrays.stream(declaredFields).filter(field -> field.isAnnotationPresent(Token.class)).forEach(field -> {
+            field.setAccessible(true);
+            try {
+                Object o = field.get(t);
+                builder.withClaim(field.getName(), objectMapper.writeValueAsString(o));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        }
+        });
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.SECOND, this._time);
         String token = builder.withExpiresAt(instance.getTime()).sign(Algorithm.HMAC256(this.sign));
@@ -102,16 +101,14 @@ public class JWTUtils {
     public <T> T parseToken(String token, Class<T> tClass) {
         if (!Objects.equals(keyStr, "")) token = decrypt(token);
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign)).build().verify(token).getClaims();
-        T t = null;
+        Map<String, Claim> claims = JWT.require(Algorithm.HMAC256(this.sign))
+                .build()
+                .verify(token)
+                .getClaims();
         try {
-            t = tClass.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        Field[] declaredFields = tClass.getDeclaredFields();
-        for (Field field : declaredFields) {
-            if (field.isAnnotationPresent(Token.class)) {
+            T t = tClass.getDeclaredConstructor().newInstance();
+            Field[] declaredFields = tClass.getDeclaredFields();
+            Arrays.stream(declaredFields).filter(field -> field.isAnnotationPresent(Token.class)).forEach(field -> {
                 field.setAccessible(true);
                 if (claims.containsKey(field.getName())) {
                     try {
@@ -120,9 +117,11 @@ public class JWTUtils {
                         throw new RuntimeException(e);
                     }
                 }
-            }
+            });
+            return t;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return t;
     }
 
     /**
@@ -150,16 +149,14 @@ public class JWTUtils {
      */
     private int calculate(String time) {
         Stack<Integer> nums = new Stack<>();
-
         int num = 0;
         char prevOp = '+';
-
         for (int i = 0; i < time.length(); i++) {
             char c = time.charAt(i);
-            if (Character.isDigit(c)) {
+            if (isDigit(c)) {
                 num = num * 10 + c - '0';
             }
-            if (!Character.isDigit(c) && c != ' ' || i == time.length() - 1) {
+            if (!isDigit(c) && c != ' ' || i == time.length() - 1) {
                 switch (prevOp) {
                     case '+' -> nums.push(num);
                     case '-' -> nums.push(-num);
@@ -171,9 +168,7 @@ public class JWTUtils {
             }
         }
         //此处复用num节约内存
-        while (!nums.isEmpty()) {
-            num += nums.pop();
-        }
+        while (!nums.isEmpty()) num += nums.pop();
         return num;
     }
 
