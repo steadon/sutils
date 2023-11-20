@@ -14,12 +14,15 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -196,19 +199,20 @@ public class TokenUtils {
      * @return Encrypted JWT
      */
     private String encrypt(String token) {
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) {
-            throw new IllegalArgumentException("Invalid token format");
-        }
         try {
-            Cipher cipherEncrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
-            cipherEncrypt.init(Cipher.ENCRYPT_MODE, keySpec);
-            byte[] encryptedBytes = cipherEncrypt.doFinal(Base64.getDecoder().decode(parts[1]));
-            String encryptedPayload = Base64.getEncoder().encodeToString(encryptedBytes);
-            return String.format("%s.%s.%s", parts[0], encryptedPayload, parts[2]);
+
+            byte[] iv = new byte[cipher.getBlockSize()];
+            new SecureRandom().nextBytes(iv);
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
+
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+            byte[] encrypted = cipher.doFinal(token.getBytes(StandardCharsets.UTF_8));
+
+            return Base64.getEncoder().encodeToString(iv) + ":" + Base64.getEncoder().encodeToString(encrypted);
         } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
-                 NoSuchPaddingException e) {
+                 NoSuchPaddingException | InvalidAlgorithmParameterException e) {
             throw new IllegalStateException("Error during encryption", e);
         }
     }
@@ -220,19 +224,25 @@ public class TokenUtils {
      * @return Decrypted JWT
      */
     private String decrypt(String token) {
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) {
-            throw new IllegalArgumentException("Invalid token format");
-        }
         try {
-            Cipher cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            String[] parts = token.split(":");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("Invalid encrypted data format");
+            }
+
+            byte[] iv = Base64.getDecoder().decode(parts[0]);
+            byte[] encrypted = Base64.getDecoder().decode(parts[1]);
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
-            cipherDecrypt.init(Cipher.DECRYPT_MODE, keySpec);
-            byte[] decryptedBytes = cipherDecrypt.doFinal(Base64.getDecoder().decode(parts[1]));
-            String decryptedPayload = Base64.getEncoder().encodeToString(decryptedBytes);
-            return String.format("%s.%s.%s", parts[0], decryptedPayload, parts[2]);
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
+
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+            byte[] decrypted = cipher.doFinal(encrypted);
+
+            return new String(decrypted, StandardCharsets.UTF_8);
         } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException |
-                 NoSuchPaddingException e) {
+                 NoSuchPaddingException | InvalidAlgorithmParameterException e) {
             throw new IllegalStateException("Error during decryption", e);
         }
     }
