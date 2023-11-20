@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/your-username/your-repository/blob/master/LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.steadon/utils.svg)](https://mvnrepository.com/artifact/io.github.steadon/utils)
 
-一个快速生成、验证、解析JWT的轻量工具。
+一个可以利用注解快速生成、验证、解析JWT的轻量工具。
 
 ### 使用
 
@@ -14,7 +14,7 @@
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>2.0.3</version>
+    <version>2.1.3</version>
 </dependency>
 ```
 
