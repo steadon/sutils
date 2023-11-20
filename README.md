@@ -13,7 +13,7 @@
 
 <dependency>
     <groupId>io.github.steadon</groupId>
-    <artifactId>utils</artifactId>
+    <artifactId>sutils</artifactId>
     <version>3.0.1</version>
 </dependency>
 ```
@@ -46,7 +46,7 @@ public class LoginParam {
 
 ```java
 @Autowired
-private JWTUtils jwtUtils;
+private TokenUtils tokenUtils;
 ```
 
 相关方法如下所示：
@@ -58,16 +58,24 @@ loginParam.setUsername("steadon");
 loginParam.setPassword("123456");
 
 //生成token
-String token=jwtUtils.createToken(loginParam);
+String token=tokenUtils.createToken(loginParam);
 log.info("token: "+token);
 
 //校验token
-if(jwtUtils.checkToken(token))log.info("成功");
+if(tokenUtils.checkToken(token))log.info("success");
 
 //解析token
-LoginParam param=jwtUtils.parseToken(token, LoginParam.class);
+LoginParam param=tokenUtils.parseToken(token, LoginParam.class);
 log.info("username: "+param.getUsername());
 log.info("password: "+param.getPassword());
+```
+
+为加密载荷时同普通token无差别，启用加密后将会得到形如以下加密token：
+
+```json
+{
+  "token": "tFMPYVYxYkLoq2hGVE9AIw==:HMu0WvHyBDn56yjBATKvS/9dI4ljwqfTtvW2gzGuuFqlVrRGr4PQePhNbe5+Dh1Ii9flM2cjcqh9ITb3jmKuI7q7zJ5BhCPl/sjfNWcSDELi7X9SgVXJVLHIRQuDmB4SykAw09dgKbmpDATliuX5CXKtBt8bVS+fAtL3+p5CapoyG8SDjuz3Fwt6S7kVz+pc4yR6iU2E9IPuS1gRGUcelg=="
+}
 ```
 
 该工具持续更新中，请保持关注！你的star就是我的动力！
