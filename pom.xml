@@ -3,7 +3,6 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -12,13 +11,13 @@
     </parent>
 
     <groupId>io.github.steadon</groupId>
-    <artifactId>utils</artifactId>
-    <version>2.1.2</version>
+    <artifactId>Sutils</artifactId>
+    <version>3.0.0</version>
     <packaging>jar</packaging>
 
-    <name>JWTUtils</name>
-    <url>https://github.com/steadon/JWTUtils</url>
-    <description>Fast token generation and parsing based on springboot</description>
+    <name>Sutils</name>
+    <url>https://github.com/steadon/Sutils</url>
+    <description>High quality personal utils</description>
 
     <!-- 开源签名证书 -->
     <licenses>
@@ -40,9 +39,9 @@
 
     <!-- 仓库信息 -->
     <scm>
-        <connection>scm:git:git://github.com/steadon/JWTUtils.git</connection>
-        <developerConnection>scm:git:ssh://github.com/steadon/JWTUtils.git</developerConnection>
-        <url>http://github.com/steadon/JWTUtils</url>
+        <connection>scm:git:git://github.com/steadon/Sutils.git</connection>
+        <developerConnection>scm:git:ssh://github.com/steadon/Sutils.git</developerConnection>
+        <url>https://github.com/steadon/Sutils</url>
     </scm>
 
     <!-- 发布项目到 sonatype -->
