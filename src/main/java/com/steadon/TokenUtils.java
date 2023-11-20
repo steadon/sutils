@@ -35,19 +35,8 @@ public class TokenUtils {
     private String time = "15 * 24 * 60 * 60";
     private int _time = 15 * 24 * 60 * 60;
     private String keyStr = "";
-    private final Cipher cipherEncrypt;
-    private final Cipher cipherDecrypt;
-    private final SecretKeySpec keySpec;
 
     public TokenUtils() {
-        try {
-            cipherEncrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
-            // Initialize vectors or other parameters as required for CBC or GCM modes
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new IllegalStateException("Error initializing ciphers", e);
-        }
     }
 
     public String getSign() {
@@ -212,11 +201,14 @@ public class TokenUtils {
             throw new IllegalArgumentException("Invalid token format");
         }
         try {
+            Cipher cipherEncrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
             cipherEncrypt.init(Cipher.ENCRYPT_MODE, keySpec);
             byte[] encryptedBytes = cipherEncrypt.doFinal(Base64.getDecoder().decode(parts[1]));
             String encryptedPayload = Base64.getEncoder().encodeToString(encryptedBytes);
             return String.format("%s.%s.%s", parts[0], encryptedPayload, parts[2]);
-        } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException e) {
+        } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
+                 NoSuchPaddingException e) {
             throw new IllegalStateException("Error during encryption", e);
         }
     }
@@ -233,11 +225,14 @@ public class TokenUtils {
             throw new IllegalArgumentException("Invalid token format");
         }
         try {
+            Cipher cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes(StandardCharsets.UTF_8), "AES");
             cipherDecrypt.init(Cipher.DECRYPT_MODE, keySpec);
             byte[] decryptedBytes = cipherDecrypt.doFinal(Base64.getDecoder().decode(parts[1]));
             String decryptedPayload = Base64.getEncoder().encodeToString(decryptedBytes);
             return String.format("%s.%s.%s", parts[0], decryptedPayload, parts[2]);
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
+        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException |
+                 NoSuchPaddingException e) {
             throw new IllegalStateException("Error during decryption", e);
         }
     }

@@ -14,7 +14,7 @@
 <dependency>
     <groupId>io.github.steadon</groupId>
     <artifactId>utils</artifactId>
-    <version>2.1.3</version>
+    <version>3.0.1</version>
 </dependency>
 ```
 

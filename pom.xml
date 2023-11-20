@@ -12,7 +12,7 @@
 
     <groupId>io.github.steadon</groupId>
     <artifactId>Sutils</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <packaging>jar</packaging>
 
     <name>Sutils</name>
