@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>io.github.steadon</groupId>
-    <artifactId>Sutils</artifactId>
-    <version>3.0.1</version>
+    <artifactId>sutils</artifactId>
+    <version>3.1.0</version>
     <packaging>jar</packaging>
 
     <name>sutils</name>
@@ -63,6 +63,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -126,5 +130,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
