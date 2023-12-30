@@ -1,4 +1,4 @@
-package com.steadon;
+package com.steadon.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.steadon.annotation.Token;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,7 @@ import java.util.*;
 @Component
 @ConfigurationProperties(prefix = "token")
 public class TokenUtils {
+
     private String sign = "root";
     private String time = "15 * 24 * 60 * 60";
     private int _time = 15 * 24 * 60 * 60;

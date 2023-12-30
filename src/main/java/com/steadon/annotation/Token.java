@@ -1,4 +1,4 @@
-package com.steadon;
+package com.steadon.annotation;
 
 import java.lang.annotation.*;
 
