@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/your-username/your-repository/blob/master/LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.steadon/utils.svg)](https://mvnrepository.com/artifact/io.github.steadon/utils)
 
-一个高质量的Spring项目工具包，包含JWT、Redis等相关问题高质量解决方案。
+一个神奇的springboot项目工具包，目前包含注解式jwt及注解式方法测速工具。
 
 ### 使用
 
